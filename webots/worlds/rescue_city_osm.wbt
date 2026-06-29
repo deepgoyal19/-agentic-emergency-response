@@ -14642,7 +14642,7 @@ Road {
 }
 Road {
   translation 108.336280 686.018036 0.010000
-  name "Chemin Claude Mandrot"
+  name "Chemin Mandrot"
   id "142600450"
   startJunction "263300584"
   endJunction "263301005"
