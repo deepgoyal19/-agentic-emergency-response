@@ -1,0 +1,179 @@
+#VRML_SIM R2025a utf8
+# Rescue City (HERO) — central Emergency Drone Base, incidents far across the city.
+# The drone launches from a base tower and flies FAST, HIGH and DIRECT over the traffic
+# to the incident, while cars wind along the roads below. Three charging towers cluster
+# at the base; three incident sites sit far out (E: accident, S: fire, NW: stalker).
+# Tall towers are kept OFF the three flight corridors so the drone never clips a building.
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/floors/protos/Floor.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/appearances/protos/Pavement.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/road/protos/Road.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/vehicles/protos/tesla/TeslaModel3Simple.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/humans/pedestrian/protos/Pedestrian.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/buildings/protos/BigGlassTower.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/buildings/protos/CyberboticsTower.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/buildings/protos/TheThreeTowers.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/buildings/protos/Hotel.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/buildings/protos/CommercialBuilding.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/buildings/protos/ResidentialBuilding.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/buildings/protos/HollowBuilding.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/trees/protos/Pine.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/robots/dji/mavic/protos/Mavic2Pro.proto"
+
+WorldInfo {
+  info [ "Central drone base; incidents far across the city; fast direct aerial response." ]
+  title "Rescue City — Gemma 4 x Cerebras"
+  basicTimeStep 8
+  defaultDamping Damping {
+    linear 0.2
+    angular 0.5
+  }
+}
+Viewpoint {
+  orientation -0.35 -0.08 0.93 2.4
+  position 150 -150 140
+  near 0.2
+  follow "Mavic 2 PRO"
+  followSmoothness 0.2
+}
+TexturedBackground {
+  luminosity 3
+}
+TexturedBackgroundLight {
+  luminosity 2.5
+}
+DirectionalLight {
+  ambientIntensity 0.9
+  color 1 1 0.96
+  direction 0.35 0.25 -1
+  intensity 5
+  castShadows TRUE
+}
+Floor {
+  size 520 520
+  tileSize 13 13
+  appearance Pavement { type "black stone" }
+}
+# Road network (cars drive these; drone overflies them)
+Road { translation -160 0 0.02 width 9 numberOfLanes 2 rightBorder FALSE leftBorder FALSE wayPoints [ 0 0 0  320 0 0 ] appearance Pavement { type "black stone" } }
+Road { translation 0 -160 0.02 rotation 0 0 1 1.5708 width 9 numberOfLanes 2 name "road(1)" rightBorder FALSE leftBorder FALSE wayPoints [ 0 0 0  320 0 0 ] appearance Pavement { type "black stone" } }
+Road { translation -160 70 0.02 width 7 numberOfLanes 2 name "road(2)" rightBorder FALSE leftBorder FALSE wayPoints [ 0 0 0  320 0 0 ] appearance Pavement { type "black stone" } }
+Road { translation -160 -70 0.02 width 7 numberOfLanes 2 name "road(3)" rightBorder FALSE leftBorder FALSE wayPoints [ 0 0 0  320 0 0 ] appearance Pavement { type "black stone" } }
+Road { translation 70 -160 0.02 rotation 0 0 1 1.5708 width 7 numberOfLanes 2 name "road(4)" rightBorder FALSE leftBorder FALSE wayPoints [ 0 0 0  320 0 0 ] appearance Pavement { type "black stone" } }
+Road { translation -70 -160 0.02 rotation 0 0 1 1.5708 width 7 numberOfLanes 2 name "road(5)" rightBorder FALSE leftBorder FALSE wayPoints [ 0 0 0  320 0 0 ] appearance Pavement { type "black stone" } }
+
+# ---------------- Emergency Drone Base (command center + 3 charging towers) ----
+DEF COMMAND_CENTER Solid {
+  translation 0 0 0
+  children [
+    Pose { translation 0 0 9 children [ Shape {
+      appearance PBRAppearance { baseColor 0.12 0.32 0.7 roughness 0.5 metalness 0.2 }
+      geometry Box { size 10 10 18 } } ] }
+    Pose { translation 0 0 18.6 children [ Shape {
+      appearance PBRAppearance { baseColor 0.1 0.85 1 emissiveColor 0.1 0.7 1 }
+      geometry Cylinder { radius 0.5 height 1.6 } } ] }
+  ]
+  name "command_center"
+}
+DEF TOWER1 Solid {
+  translation -14 10 0
+  children [
+    Pose { translation 0 0 0.1 children [ Shape { appearance PBRAppearance { baseColor 0.15 0.5 0.9 roughness 0.4 metalness 0.3 } geometry Cylinder { radius 2.2 height 0.2 } } ] }
+    Pose { translation 0 0 2 children [ Shape { appearance PBRAppearance { baseColor 0.3 0.3 0.35 roughness 0.3 metalness 0.6 } geometry Box { size 0.35 0.35 4 } } ] }
+    Pose { translation 0 0 4.2 children [ Shape { appearance PBRAppearance { baseColor 0.1 0.85 1 emissiveColor 0.1 0.8 1 } geometry Sphere { radius 0.35 } } ] }
+  ]
+  name "tower1"
+}
+DEF TOWER2 Solid {
+  translation 14 10 0
+  children [
+    Pose { translation 0 0 0.1 children [ Shape { appearance PBRAppearance { baseColor 0.15 0.5 0.9 roughness 0.4 metalness 0.3 } geometry Cylinder { radius 2.2 height 0.2 } } ] }
+    Pose { translation 0 0 2 children [ Shape { appearance PBRAppearance { baseColor 0.3 0.3 0.35 roughness 0.3 metalness 0.6 } geometry Box { size 0.35 0.35 4 } } ] }
+    Pose { translation 0 0 4.2 children [ Shape { appearance PBRAppearance { baseColor 0.1 0.85 1 emissiveColor 0.1 0.8 1 } geometry Sphere { radius 0.35 } } ] }
+  ]
+  name "tower2"
+}
+DEF TOWER3 Solid {
+  translation 0 -16 0
+  children [
+    Pose { translation 0 0 0.1 children [ Shape { appearance PBRAppearance { baseColor 0.15 0.5 0.9 roughness 0.4 metalness 0.3 } geometry Cylinder { radius 2.2 height 0.2 } } ] }
+    Pose { translation 0 0 2 children [ Shape { appearance PBRAppearance { baseColor 0.3 0.3 0.35 roughness 0.3 metalness 0.6 } geometry Box { size 0.35 0.35 4 } } ] }
+    Pose { translation 0 0 4.2 children [ Shape { appearance PBRAppearance { baseColor 0.1 0.85 1 emissiveColor 0.1 0.8 1 } geometry Sphere { radius 0.35 } } ] }
+  ]
+  name "tower3"
+}
+
+# ---------------- Tall towers (kept OFF the 3 flight corridors) --------------
+BigGlassTower { translation 70 95 0 name "glass tower" }
+CyberboticsTower { translation -95 -65 0 name "cyber tower" }
+TheThreeTowers { translation 95 -55 0 name "three towers" }
+
+# ---------------- Mid-rise buildings (drone cruises at 22m, above these) -----
+Hotel { translation 45 40 0 name "hotel 1" }
+Hotel { translation -55 35 0 rotation 0 0 1 1.5708 name "hotel 2" }
+CommercialBuilding { translation 40 -35 0 name "comm 1" }
+CommercialBuilding { translation -45 -30 0 rotation 0 0 1 1.5708 name "comm 2" }
+CommercialBuilding { translation 60 15 0 name "comm 3" }
+ResidentialBuilding { translation -60 5 0 name "res 1" }
+ResidentialBuilding { translation 30 60 0 rotation 0 0 1 3.14159 name "res 2" }
+ResidentialBuilding { translation -30 -55 0 name "res 3" }
+HollowBuilding { translation 55 -15 0 name "hollow 1" }
+HollowBuilding { translation -70 -40 0 name "hollow 2" }
+Pine { translation 20 25 0 name "pine 1" }
+Pine { translation -25 20 0 name "pine 2" }
+Pine { translation 25 -25 0 name "pine 3" }
+Pine { translation -22 -28 0 name "pine 4" }
+Pine { translation 35 5 0 name "pine 5" }
+Pine { translation -35 -8 0 name "pine 6" }
+
+# ================= INCIDENT 1: accident @ (175, 35) — far EAST ==============
+DEF CRASH_CAR_A TeslaModel3Simple { translation 175 35 0.4 rotation 0 0 1 0.35 name "crash car A" }
+DEF CRASH_CAR_B TeslaModel3Simple { translation 177.6 36.3 0.4 rotation 0 0 1 -2.5 name "crash car B" }
+DEF VICTIM1 Pedestrian { translation 174.2 36.8 0.35 rotation 1 0 0 1.5708 name "victim1" controller "<none>" }
+DEF VICTIM2 Pedestrian { translation 176.6 33.7 0.35 rotation 0 1 0 1.5708 name "victim2" controller "<none>" }
+
+# ================= INCIDENT 2: stalker @ (-170, 120) — far NW ===============
+DEF WOMAN Pedestrian { translation -170 120 1.27 rotation 0 0 1 1.5708 name "woman" controller "<none>" }
+DEF FOLLOWER Pedestrian { translation -171.6 118.4 1.27 rotation 0 0 1 1.5708 name "follower" shirtColor 0.1 0.1 0.1 pantsColor 0.05 0.05 0.05 controller "<none>" }
+
+# ================= INCIDENT 3: vehicle fire @ (-40, -185) — far SOUTH =======
+DEF FIRE_CAR TeslaModel3Simple { translation -40 -185 0.4 rotation 0 0 1 0.6 name "burning car" }
+DEF FIRE_FLAMES Solid {
+  translation -40 -185 0
+  children [
+    Pose { translation 0.6 0.1 0.02 children [ Shape { appearance Appearance { material Material { diffuseColor 0.05 0.04 0.04 } } geometry Cylinder { radius 3 height 0.04 } } ] }
+    Pose { translation 0.8 0.2 0.9 children [ Shape { appearance PBRAppearance { baseColor 1 0.9 0.5 emissiveColor 1 0.85 0.4 roughness 1 metalness 0 } geometry Sphere { radius 0.55 subdivision 2 } } ] }
+    Pose { translation 0.8 0.2 1.5 children [ Shape { appearance PBRAppearance { baseColor 0.9 0.13 0 emissiveColor 0.95 0.2 0 roughness 1 metalness 0 } geometry Cone { bottomRadius 0.95 height 2.6 } } ] }
+    Pose { translation 0.7 0.0 1.6 children [ Shape { appearance PBRAppearance { baseColor 1 0.45 0 emissiveColor 1 0.5 0 roughness 1 metalness 0 } geometry Cone { bottomRadius 0.6 height 2.1 } } ] }
+    Pose { translation 0.85 0.3 1.5 children [ Shape { appearance PBRAppearance { baseColor 1 0.75 0.1 emissiveColor 1 0.8 0.2 roughness 1 metalness 0 } geometry Cone { bottomRadius 0.4 height 1.7 } } ] }
+    Pose { translation 1.3 -0.4 0.9 children [ Shape { appearance PBRAppearance { baseColor 1 0.4 0 emissiveColor 1 0.45 0 roughness 1 } geometry Cone { bottomRadius 0.32 height 1.2 } } ] }
+    Pose { translation 0.9 0.2 3.2 children [ Shape { appearance Appearance { material Material { diffuseColor 0.18 0.18 0.18 transparency 0.4 } } geometry Sphere { radius 1.3 subdivision 2 } } ] }
+    Pose { translation 1.2 0.4 4.7 children [ Shape { appearance Appearance { material Material { diffuseColor 0.2 0.2 0.2 transparency 0.55 } } geometry Sphere { radius 1.7 subdivision 2 } } ] }
+  ]
+  name "flames"
+}
+PointLight { attenuation 0 0 1 color 1 0.5 0.15 intensity 16 location -39.2 -184.6 1.5 castShadows FALSE }
+
+# ---------------- Ambient city life (cars on roads near the base) ------------
+DEF TRAFFIC1 TeslaModel3Simple { translation -60 -3 0.35 name "traffic1" }
+DEF TRAFFIC2 TeslaModel3Simple { translation 60 3 0.35 name "traffic2" }
+DEF TRAFFIC3 TeslaModel3Simple { translation -3 -60 0.35 name "traffic3" }
+DEF TRAFFIC4 TeslaModel3Simple { translation 3 60 0.35 name "traffic4" }
+DEF TRAFFIC5 TeslaModel3Simple { translation -60 67 0.35 name "traffic5" }
+DEF TRAFFIC6 TeslaModel3Simple { translation 60 73 0.35 name "traffic6" }
+DEF CIVIL1 Pedestrian { translation 22 16 1.27 name "civ1" shirtColor 0.8 0.2 0.2 controller "<none>" }
+DEF CIVIL2 Pedestrian { translation -26 14 1.27 name "civ2" shirtColor 0.2 0.4 0.8 controller "<none>" }
+DEF CIVIL3 Pedestrian { translation 14 -30 1.27 name "civ3" shirtColor 0.9 0.7 0.1 controller "<none>" }
+DEF CITY_LIFE Robot { name "city_life" controller "city_life" supervisor TRUE children [] }
+
+# ---------------- The emergency drone (launches from a base tower) ----------
+Mavic2Pro {
+  translation 14 10 0.3
+  rotation 0 0 1 3.14159
+  name "Mavic 2 PRO"
+  controller "drone_agent"
+  supervisor TRUE
+  cameraSlot [ Camera { width 640 height 400 near 0.2 } ]
+}

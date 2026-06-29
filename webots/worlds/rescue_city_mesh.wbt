@@ -1,0 +1,118 @@
+#VRML_SIM R2025a utf8
+# Rescue City (MESH HERO) — imported low-poly city (city_pack_2 -> city.obj), ~515x680 m.
+# Drone launches from a spread tower, flies high over the city to a street incident.
+# Tower/incident coords come from DEFAULT_FLEET.mesh_xy and presets.mesh_location.
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/floors/protos/Floor.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/vehicles/protos/tesla/TeslaModel3Simple.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/humans/pedestrian/protos/Pedestrian.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/robots/dji/mavic/protos/Mavic2Pro.proto"
+
+WorldInfo {
+  info [ "Imported mesh city; drone emergency response." ]
+  title "Rescue City (mesh)"
+  basicTimeStep 16
+}
+Viewpoint {
+  orientation -0.36 -0.12 0.92 2.25
+  position 330 -300 240
+  near 0.5
+}
+Background { skyColor [ 0.45 0.65 0.92 ] }
+TexturedBackgroundLight { luminosity 1.0 }
+DirectionalLight {
+  ambientIntensity 0.5
+  color 1 0.99 0.96
+  direction 0.3 0.3 -1
+  intensity 1.6
+  castShadows FALSE
+}
+DEF CITY Solid {
+  translation 0 0 0
+  children [ CadShape { url [ "../assets/citymesh/city_fixed.obj" ] } ]
+  name "city_mesh"
+}
+
+# ---- charging towers (spread; coords match DEFAULT_FLEET.mesh_xy) ----------
+DEF TOWER1 Solid { translation -168 63 0 children [ CadShape { url [ "../assets/towermodel/tower.obj" ] } ] name "tower1" }
+DEF TOWER2 Solid { translation 134 -103 0 children [ CadShape { url [ "../assets/towermodel/tower.obj" ] } ] name "tower2" }
+DEF TOWER3 Solid { translation 39 160 0 children [ CadShape { url [ "../assets/towermodel/tower.obj" ] } ] name "tower3" }
+
+# ---- incident objects (all sit ON real roads; coords read off the labeled road top view) ----
+DEF CRASH_SCENE Solid { translation -9 -249 0 rotation 0 0 1 0.5 children [ CadShape { url [ "../assets/carcrashmodel/carcrash.obj" ] } ] name "crash scene" }
+DEF VICTIM1 Pedestrian { translation -11 -248 0.35 rotation 1 0 0 1.5708 name "victim1" controller "<none>" }
+DEF VICTIM2 Pedestrian { translation -7 -250 0.35 rotation 0 1 0 1.5708 name "victim2" controller "<none>" }
+
+# Stalker scene on the X=-136 street: the WOMAN walks FORWARD (long one-way path, never turns
+# back). The FOLLOWER is supervisor-controlled by run_stalker so he only turns back ON the warning.
+DEF WOMAN Pedestrian { translation -136 215 1.27 rotation 0 0 1 1.5708 name "woman" controller "pedestrian" synchronization FALSE controllerArgs [ "--trajectory=-136 215, -136 285" "--speed=0.7" ] }
+DEF FOLLOWER Pedestrian { translation -136 209 1.27 rotation 0 0 1 1.5708 name "follower" shirtColor 0.1 0.1 0.1 controller "<none>" }
+
+DEF FIRE_BIKE Solid { translation 170 290 0 rotation 0 0 1 0.6 children [ CadShape { url [ "../assets/bikefiremodel/bikefire.obj" ] } ] name "burning bike" }
+PointLight { attenuation 0 0 1 color 1 0.5 0.15 intensity 16 location 170.5 290.5 1.5 castShadows FALSE }
+
+# ---- armed suspect on a plaza (patrol-drone target) ------------------------
+# Plaza patch guarantees open ground; an oversized rifle prop in hand stays
+# readable from the patrol drone's low scan pass (~13 m) for Gemma vision.
+DEF GUNMAN Pedestrian { translation -10 30 1.27 rotation 0 0 1 1.5708 name "gunman" shirtColor 0.12 0.12 0.14 pantsColor 0.1 0.1 0.1 controller "<none>" }
+DEF RIFLE Solid { translation -9.65 30.3 1.15 rotation 0 0 1 1.5708 children [
+  CadShape { url [ "../assets/gunmodel/gun.obj" ] }
+] name "rifle" }
+# Police car: parked up the suspect's street (X=-10); when Gemma's Coordinator dispatches
+# police for the armed suspect, the patrol drives it SOUTH down the road to the scene.
+DEF POLICE_CAR Solid { translation -10 200 0 rotation 0 0 1 -1.5708 children [ CadShape { url [ "../assets/policemodel/police.obj" ] } ] name "police car" }
+
+# ---- burning high-rise (fire-brigade target) -------------------------------
+# 90 m skyscraper, fire on the UPPER FLOORS of the +y facade (z ~ 54 / 67 / 80).
+# The fire-brigade squad approaches the facade and Gemma reads which floor burns.
+# Flame cones are rotated (1 0 0 -1.5708) so they tongue upward in this z-up world.
+DEF HIGHRISE Solid { translation 150 150 0 children [
+  Pose { translation 0 0 45 children [ Shape { appearance PBRAppearance { baseColorMap ImageTexture { url [ "../assets/fire/facade.png" ] } textureTransform TextureTransform { scale 1.5 7.5 } roughness 0.3 metalness 0.55 } geometry Box { size 18 18 90 } } ] }
+  Pose { translation 0 0 90.3 children [ Shape { appearance PBRAppearance { baseColor 0.22 0.24 0.28 roughness 0.8 } geometry Box { size 18 18 0.6 } } ] }
+  # floor ~80 (top) — downloaded fire model (Jakob Hippe, CC-BY)
+  Pose { translation 0 9.05 80 children [ Shape { appearance PBRAppearance { baseColor 0.03 0.03 0.03 roughness 1 } geometry Box { size 8 0.3 6 } } ] }
+  Pose { translation -2.4 10.5 78 children [ CadShape { url [ "../assets/firemodel/fire.obj" ] } ] }
+  Pose { translation 2.6 10.5 78 rotation 0 0 1 2.1 children [ CadShape { url [ "../assets/firemodel/fire.obj" ] } ] }
+  Pose { translation 0 10 86.5 children [ Shape { appearance Appearance { material Material { diffuseColor 0.12 0.12 0.12 transparency 0.5 } } geometry Sphere { radius 3.6 subdivision 2 } } ] }
+  # floor ~67 (mid)
+  Pose { translation 0 9.05 67 children [ Shape { appearance PBRAppearance { baseColor 0.03 0.03 0.03 roughness 1 } geometry Box { size 8 0.3 6 } } ] }
+  Pose { translation -2.6 10.5 65 children [ CadShape { url [ "../assets/firemodel/fire.obj" ] } ] }
+  Pose { translation 2.4 10.5 65 rotation 0 0 1 1.3 children [ CadShape { url [ "../assets/firemodel/fire.obj" ] } ] }
+  Pose { translation 0 10 73.5 children [ Shape { appearance Appearance { material Material { diffuseColor 0.13 0.13 0.13 transparency 0.5 } } geometry Sphere { radius 3.8 subdivision 2 } } ] }
+  # floor ~54 (lower)
+  Pose { translation 0 9.05 54 children [ Shape { appearance PBRAppearance { baseColor 0.03 0.03 0.03 roughness 1 } geometry Box { size 8 0.3 6 } } ] }
+  Pose { translation -2.4 10.5 52 children [ CadShape { url [ "../assets/firemodel/fire.obj" ] } ] }
+  Pose { translation 2.6 10.5 52 rotation 0 0 1 2.6 children [ CadShape { url [ "../assets/firemodel/fire.obj" ] } ] }
+  Pose { translation 0 10 60.5 children [ Shape { appearance Appearance { material Material { diffuseColor 0.13 0.13 0.13 transparency 0.5 } } geometry Sphere { radius 3.6 subdivision 2 } } ] }
+] name "highrise" }
+PointLight { attenuation 0 0 1 color 1 0.55 0.2 intensity 16 location 150 162 80 castShadows FALSE }
+PointLight { attenuation 0 0 1 color 1 0.5 0.15 intensity 16 location 150 162 67 castShadows FALSE }
+PointLight { attenuation 0 0 1 color 1 0.5 0.15 intensity 14 location 150 162 54 castShadows FALSE }
+
+# ---- the drone fleet (7 Mavics; each picks its role from MULTI by name) -----
+# Responders launch to ground emergencies, the firebrigade squad to the high-rise,
+# Drone4 patrols. They reposition onto their dispatched tower at launch, so spawn
+# positions only park them at a tower for the opening shot.
+DEF DRONE1 Mavic2Pro { translation 134 -103 4.0 rotation 0 0 1 3.14159 name "Drone1" controller "drone_agent" supervisor TRUE synchronization FALSE
+  cameraSlot [ Camera { name "camera" width 640 height 400 fieldOfView 1.0 near 0.2 } ]
+  bodySlot [ Pose { translation 0 0 -0.06 rotation 0 1 0 1.5708 children [ Camera { name "down camera" width 640 height 480 fieldOfView 1.1 near 0.2 } ] } Pose { translation -3.5 0 1.3 rotation 0 1 0 0.38 children [ Camera { name "chase camera" width 512 height 300 fieldOfView 1.2 near 0.1 } ] } ] }
+DEF DRONE2 Mavic2Pro { translation 39 160 4.0 rotation 0 0 1 3.14159 name "Drone2" controller "drone_agent" supervisor TRUE synchronization FALSE
+  cameraSlot [ Camera { name "camera" width 640 height 400 fieldOfView 1.0 near 0.2 } ]
+  bodySlot [ Pose { translation 0 0 -0.06 rotation 0 1 0 1.5708 children [ Camera { name "down camera" width 640 height 480 fieldOfView 1.1 near 0.2 } ] } Pose { translation -3.5 0 1.3 rotation 0 1 0 0.38 children [ Camera { name "chase camera" width 512 height 300 fieldOfView 1.2 near 0.1 } ] } ] }
+DEF DRONE3 Mavic2Pro { translation -168 63 4.0 rotation 0 0 1 3.14159 name "Drone3" controller "drone_agent" supervisor TRUE synchronization FALSE
+  cameraSlot [ Camera { name "camera" width 640 height 400 fieldOfView 1.0 near 0.2 } ]
+  bodySlot [ Pose { translation 0 0 -0.06 rotation 0 1 0 1.5708 children [ Camera { name "down camera" width 640 height 480 fieldOfView 1.1 near 0.2 } ] } Pose { translation -3.5 0 1.3 rotation 0 1 0 0.38 children [ Camera { name "chase camera" width 512 height 300 fieldOfView 1.2 near 0.1 } ] } ] }
+DEF DRONE4 Mavic2Pro { translation -162 67 4.0 rotation 0 0 1 3.14159 name "Drone4" controller "drone_agent" supervisor TRUE synchronization FALSE
+  cameraSlot [ Camera { name "camera" width 640 height 400 fieldOfView 1.0 near 0.2 } ]
+  bodySlot [ Pose { translation 0 0 -0.06 rotation 0 1 0 1.5708 children [ Camera { name "down camera" width 640 height 480 fieldOfView 1.1 near 0.2 } ] } Pose { translation -3.5 0 1.3 rotation 0 1 0 0.38 children [ Camera { name "chase camera" width 512 height 300 fieldOfView 1.2 near 0.1 } ] } ] }
+DEF DRONE5 Mavic2Pro { translation 45 160 4.0 rotation 0 0 1 3.14159 name "Drone5" controller "drone_agent" supervisor TRUE synchronization FALSE
+  cameraSlot [ Camera { name "camera" width 640 height 400 fieldOfView 1.0 near 0.2 } ]
+  bodySlot [ Pose { translation 0 0 -0.06 rotation 0 1 0 1.5708 children [ Camera { name "down camera" width 640 height 480 fieldOfView 1.1 near 0.2 } ] } Pose { translation -3.5 0 1.3 rotation 0 1 0 0.38 children [ Camera { name "chase camera" width 512 height 300 fieldOfView 1.2 near 0.1 } ] } ] }
+DEF DRONE6 Mavic2Pro { translation 128 -103 4.0 rotation 0 0 1 3.14159 name "Drone6" controller "drone_agent" supervisor TRUE synchronization FALSE
+  cameraSlot [ Camera { name "camera" width 640 height 400 fieldOfView 1.0 near 0.2 } ]
+  bodySlot [ Pose { translation 0 0 -0.06 rotation 0 1 0 1.5708 children [ Camera { name "down camera" width 640 height 480 fieldOfView 1.1 near 0.2 } ] } Pose { translation -3.5 0 1.3 rotation 0 1 0 0.38 children [ Camera { name "chase camera" width 512 height 300 fieldOfView 1.2 near 0.1 } ] } ] }
+DEF DRONE7 Mavic2Pro { translation -168 69 4.0 rotation 0 0 1 3.14159 name "Drone7" controller "drone_agent" supervisor TRUE synchronization FALSE
+  cameraSlot [ Camera { name "camera" width 640 height 400 fieldOfView 1.0 near 0.2 } ]
+  bodySlot [ Pose { translation 0 0 -0.06 rotation 0 1 0 1.5708 children [ Camera { name "down camera" width 640 height 480 fieldOfView 1.1 near 0.2 } ] } Pose { translation -3.5 0 1.3 rotation 0 1 0 0.38 children [ Camera { name "chase camera" width 512 height 300 fieldOfView 1.2 near 0.1 } ] } ] }

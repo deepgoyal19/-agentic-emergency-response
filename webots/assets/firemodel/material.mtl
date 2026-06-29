@@ -1,0 +1,8 @@
+# fire model (Jakob Hippe, CC-BY) - made emissive so it glows
+newmtl material_0
+Ka 1 1 1
+Kd 1 1 1
+Ks 0.1 0.1 0.1
+Ke 1 0.55 0.2
+Ns 8
+map_Kd material_0.png

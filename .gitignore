@@ -1,0 +1,28 @@
+# --- secrets (NEVER commit) ---
+.env
+.env.local
+*.key
+
+# --- python ---
+__pycache__/
+*.pyc
+*.pyo
+
+# --- Webots runtime artifacts (regenerated every run) ---
+webots/mission.json
+webots/mission_log.json
+webots/mission_log.json.tmp
+webots/mission_log_*.json
+webots/live_pos*.json
+webots/backup_request.json
+webots/mission_error.log
+webots/run_*.log
+webots/frames/
+webots/_preview*.wbt
+webots/_*.png
+webots/.*.wbproj
+*.tmp
+
+# Webots per-user perspective files (cause overlay-storm crash on open)
+*.wbproj
+.*.wbproj

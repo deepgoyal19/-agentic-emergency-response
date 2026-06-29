@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Rescue City — Placement Picker</title>
+<style>
+  body{margin:0;background:#0d1117;color:#e6edf3;font:13px system-ui,sans-serif;display:flex;height:100vh}
+  #left{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+  #wrap{position:relative;line-height:0}
+  #city{max-height:94vh;max-width:64vw;cursor:crosshair;border:1px solid #30363d}
+  #ov{position:absolute;left:0;top:0;pointer-events:none}
+  #side{width:340px;background:#161b22;padding:14px;overflow:auto;border-left:1px solid #30363d}
+  h2{margin:.2em 0;font-size:15px} h3{margin:.8em 0 .3em;font-size:12px;color:#9aa7b4;text-transform:uppercase;letter-spacing:.05em}
+  .obj{display:inline-block;margin:3px;padding:6px 10px;border-radius:6px;border:1px solid #30363d;background:#21262d;cursor:pointer;font-weight:600}
+  .obj.sel{outline:2px solid #58a6ff;background:#1f6feb33}
+  #coord{position:absolute;top:8px;left:8px;background:#000a;padding:4px 8px;border-radius:5px;font-weight:700}
+  textarea{width:100%;height:200px;background:#0d1117;color:#7ee787;border:1px solid #30363d;border-radius:6px;font:12px monospace;padding:6px}
+  button.act{margin-top:6px;padding:6px 12px;border-radius:6px;border:1px solid #30363d;background:#238636;color:#fff;font-weight:700;cursor:pointer}
+  button.clr{background:#6e2031}
+  .row{margin:4px 0} .hint{color:#9aa7b4;font-size:11px;line-height:1.5}
+  table{width:100%;border-collapse:collapse;font-size:12px} td{padding:2px 4px;border-bottom:1px solid #21262d}
+</style></head>
+<body>
+<div id="left">
+  <div id="wrap">
+    <img id="city" src="citymap.png?t=PICK" alt="city">
+    <canvas id="ov"></canvas>
+    <div id="coord">move over the map…</div>
+  </div>
+</div>
+<div id="side">
+  <h2>◉ Placement Picker</h2>
+  <div class="hint">Pick an object, then <b>click the map</b> to place it. Roads are the pinkish grid;
+  green = parks/courtyards; grey blocks = buildings (avoid). Coords update below — copy them to me.</div>
+  <h3>Object</h3>
+  <div id="palette"></div>
+  <h3 id="pathhdr" style="display:none">Suspect path</h3>
+  <div class="hint" id="pathhint" style="display:none">Click multiple points for the suspect's walk; they chain in order.</div>
+  <h3>Placements</h3>
+  <table id="tbl"></table>
+  <h3>Copy to chat</h3>
+  <textarea id="out" readonly></textarea>
+  <div class="row">
+    <button class="act" onclick="copyOut()">Copy</button>
+    <button class="act clr" onclick="clearAll()">Clear all</button>
+  </div>
+</div>
+<script>
+// citymap.png convention (matches the dashboard 2D map): +X right, +Y up, world range +/-MAP_EXT.
+const MAP_EXT=350;
+const OBJECTS=[['accident','#ff5b5b'],['fire','#ff9f1a'],['stalker','#d762ff'],
+               ['suspect','#000','path'],['tower1','#58a6ff'],['tower2','#58a6ff'],['tower3','#58a6ff']];
+let sel='accident', placed={}, suspectPath=[];
+const img=document.getElementById('city'), ov=document.getElementById('ov'), ctx=ov.getContext('2d');
+const coord=document.getElementById('coord');
+
+function buildPalette(){
+  const p=document.getElementById('palette'); p.innerHTML='';
+  OBJECTS.forEach(([name,col,kind])=>{
+    const b=document.createElement('span'); b.className='obj'+(name===sel?' sel':''); b.textContent=name;
+    b.style.borderColor=col; b.onclick=()=>{sel=name;buildPalette();
+      const isPath=kind==='path'; document.getElementById('pathhdr').style.display=isPath?'block':'none';
+      document.getElementById('pathhint').style.display=isPath?'block':'none';};
+    p.appendChild(b);
+  });
+}
+function px2world(px,py){          // px,py in NATURAL image pixels
+  const wx=(px/img.naturalWidth)*2*MAP_EXT - MAP_EXT;
+  const wy=MAP_EXT - (py/img.naturalHeight)*2*MAP_EXT;
+  return [Math.round(wx), Math.round(wy)];
+}
+function world2disp(wx,wy){        // -> displayed canvas px
+  const nx=(wx+MAP_EXT)/(2*MAP_EXT)*img.naturalWidth, ny=(MAP_EXT-wy)/(2*MAP_EXT)*img.naturalHeight;
+  return [nx*img.clientWidth/img.naturalWidth, ny*img.clientHeight/img.naturalHeight];
+}
+function evtPx(e){
+  const r=img.getBoundingClientRect();
+  const px=(e.clientX-r.left)*img.naturalWidth/r.width, py=(e.clientY-r.top)*img.naturalHeight/r.height;
+  return [px,py];
+}
+img.addEventListener('mousemove',e=>{const [px,py]=evtPx(e);const[wx,wy]=px2world(px,py);coord.textContent=`x=${wx}, y=${wy}`;});
+img.addEventListener('click',e=>{
+  const [px,py]=evtPx(e); const [wx,wy]=px2world(px,py);
+  if(sel==='suspect'){ suspectPath.push([wx,wy]); }
+  else placed[sel]=[wx,wy];
+  redraw(); render();
+});
+function sync(){ ov.width=img.clientWidth; ov.height=img.clientHeight; redraw(); }
+function dot(wx,wy,col,label){
+  const [a,c]=world2disp(wx,wy);
+  ctx.fillStyle=col; ctx.strokeStyle='#fff'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.arc(a,c,6,0,7); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#fff'; ctx.font='bold 12px sans-serif'; ctx.fillText(label,a+8,c+4);
+}
+function redraw(){
+  ctx.clearRect(0,0,ov.width,ov.height);
+  for(const k in placed){const c=(OBJECTS.find(o=>o[0]===k)||[])[1]||'#fff'; dot(placed[k][0],placed[k][1],c,k);}
+  if(suspectPath.length){ ctx.strokeStyle='#000'; ctx.lineWidth=3; ctx.beginPath();
+    suspectPath.forEach((p,i)=>{const[a,c]=world2disp(p[0],p[1]); i?ctx.lineTo(a,c):ctx.moveTo(a,c);}); ctx.stroke();
+    suspectPath.forEach((p,i)=>dot(p[0],p[1],'#000','S'+(i+1))); }
+}
+function render(){
+  const t=document.getElementById('tbl'); t.innerHTML='';
+  const rows=[];
+  for(const k in placed) rows.push([k, `(${placed[k][0]}, ${placed[k][1]})`]);
+  if(suspectPath.length) rows.push(['suspect path', suspectPath.map(p=>`(${p[0]},${p[1]})`).join(' → ')]);
+  rows.forEach(([a,b])=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${a}</td><td>${b}</td>`;t.appendChild(tr);});
+  let s='';
+  for(const k in placed) s+=`${k}: (${placed[k][0]}, ${placed[k][1]})\n`;
+  if(suspectPath.length) s+=`suspect path: ${suspectPath.map(p=>`(${p[0]},${p[1]})`).join(' -> ')}\n`;
+  document.getElementById('out').value=s;
+}
+function copyOut(){ document.getElementById('out').select(); document.execCommand('copy'); }
+function clearAll(){ placed={}; suspectPath=[]; redraw(); render(); }
+buildPalette();
+if(img.complete) sync(); img.onload=sync; window.addEventListener('resize',sync);
+</script>
+</body></html>

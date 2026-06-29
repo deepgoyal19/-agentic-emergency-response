@@ -1,0 +1,21 @@
+#VRML_SIM R2025a utf8
+# Top-down capture of the mesh city -> edge map for the dashboard minimap.
+# Camera at (0,0,470) looking straight down, FOV 1.28 -> covers world x,y in [-350, 350].
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+
+WorldInfo { basicTimeStep 16 }
+Viewpoint { orientation 0 0 1 0 position 0 0 700 }
+Background { skyColor [ 0.05 0.05 0.06 ] }
+TexturedBackgroundLight { luminosity 2 }
+DirectionalLight { ambientIntensity 1 color 1 1 1 direction 0 0 -1 intensity 3 castShadows FALSE }
+DEF CITY Solid {
+  children [ CadShape { url [ "../assets/citymesh/city.obj" ] } ]
+  name "city_mesh"
+}
+DEF SHOT Robot {
+  translation 0 0 560
+  rotation 0 1 0 1.5708
+  children [ Camera { name "camera" width 1024 height 1024 fieldOfView 1.2870 near 1 } ]
+  name "shot"
+  controller "preview_shot"
+}

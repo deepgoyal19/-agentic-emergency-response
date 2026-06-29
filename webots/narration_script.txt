@@ -1,0 +1,74 @@
+AGENTIC EMERGENCY RESPONSE SYSTEM — VIDEO NARRATION SCRIPT
+(for text-to-speech. Each block is one scene. Spoken lines are plain text — no symbols.)
+
+====================================================================
+[SCENE 1 — OPENING — wide shot of the city, drones resting on the towers]
+====================================================================
+
+This is an Agentic Emergency Response System for a smart city.
+
+Seven autonomous drones wait on charging towers across the skyline. When an emergency is reported, they don't follow a fixed script. Instead, a team of specialized agents — each one powered by Gemma 4, running on Cerebras — reasons about the situation in real time and decides what to do.
+
+Eight different agents work together: a Dispatcher, a Path Planner, a Perception agent, a Surveillance agent, an Analyst, a Coordinator, an Executor, and a Fleet Manager. In a single response cycle, they make over forty Gemma 4 calls — and Cerebras returns all of that reasoning in about six seconds of total compute.
+
+Let's watch four emergencies unfold at the same time.
+
+====================================================================
+[SCENE 2 — TRAFFIC ACCIDENT — Drone 1, the crash scene with the casualty]
+====================================================================
+
+A nine-one-one call reports a traffic accident. The Dispatcher agent classifies it as a critical medical emergency, and the Path Planner routes the nearest drone from its tower.
+
+Drone One launches and flies two hundred meters across the city in about twelve seconds. On arrival, it does not just hover. The Perception agent looks through the camera and decides, frame by frame, how low to go — coming down to around three and a half meters, close enough to assess the casualty, but safely above the wreck.
+
+Gemma's vision reports what it sees: a vehicle overturned, a person on the ground. The Executor then delivers the first aid kit right beside the casualty — not over the car, but next to the person who needs it.
+
+====================================================================
+[SCENE 3 — THE STALKER — Drone 2, the woman walking, the man following]
+====================================================================
+
+A second call: a woman reports a man following her on the street.
+
+Drone Two responds and tracks the caller from above. But the threat is not the woman — it is the man trailing her. So the drone moves over the follower and analyzes him with two cameras: a forward camera angled down, and a straight-down view.
+
+Gemma sees the man trailing her, and the drone broadcasts a warning: step away from her — police are on the way. The stalker turns back and retreats the way he came. Gemma's vision confirms the suspect is leaving in the opposite direction — and only then does the Coordinator declare the scene safe and clear the drone to return.
+
+====================================================================
+[SCENE 4 — THE HIGH-RISE FIRE — Drone 5 leads, Drones 6 and 7 reinforce]
+====================================================================
+
+Across town, a high-rise tower is burning.
+
+The lead fire-brigade drone arrives first and flies a multi-angle sweep of the burning facade. Gemma's vision sees active flames engulfing the upper floors — and this is the key moment: the Coordinator agent decides, from what it sees, that one unit is not enough. It calls for two more fire units.
+
+Only then do the two reinforcement drones launch from their tower — dispatched on demand, by Gemma, not by a hard-coded plan. The squad splits the tower by floor and knocks down the fire together.
+
+====================================================================
+[SCENE 5 — THE ARMED SUSPECT — Drone 4 patrol, the police car]
+====================================================================
+
+Meanwhile, a patrol drone flies a continuous surveillance route over the city, with Gemma analyzing each sector.
+
+Over one sector, it spots a person of interest and breaks off to investigate. Coming in low, Gemma confirms the threat: an armed suspect with a rifle.
+
+Now the Coordinator agent makes a decision that no single drone could make alone. It does not call for more drones — it dispatches a police car, because that is the right responder for an armed suspect. The patrol drone holds aerial overwatch and tracks the suspect purely by vision, relaying his last known position to the units as he moves.
+
+The police car races down the street to the coordinates the drone is feeding it. When it arrives, the drone takes one more picture, Gemma confirms the suspect is now with police, and the handoff is complete. The drone is cleared to return.
+
+====================================================================
+[SCENE 6 — CLOSE — the dashboard with all agents, timers, map]
+====================================================================
+
+Everything you just saw was decided live. No scripts, no hard-coded responses — eight Gemma 4 agents, reasoning over real camera images, coordinating seven drones, three police and fire units, and the entire city.
+
+Over forty agent decisions, around six seconds of Cerebras compute, and four emergencies resolved at once.
+
+This is what agentic emergency response looks like — Gemma 4, on Cerebras.
+
+====================================================================
+[OPTIONAL SHORT VERSION — ~30 seconds, if you need a teaser]
+====================================================================
+
+Seven drones. Eight Gemma 4 agents on Cerebras. One smart city.
+
+When emergencies strike — a crash, a stalker, a fire, an armed suspect — the agents reason in real time: who to send, how low to fly, when to call a police car, when to call for backup. Over forty live agent decisions, six seconds of compute, four emergencies handled at once. This is agentic emergency response, powered by Gemma 4 on Cerebras.

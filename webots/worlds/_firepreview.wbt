@@ -1,0 +1,19 @@
+#VRML_SIM R2025a utf8
+# Quick close-up preview of the downloaded fire model.
+WorldInfo { basicTimeStep 16 }
+Viewpoint { orientation 0 0 1 0 position 0 -20 6 }
+Background { skyColor [ 0.45 0.65 0.92 ] }
+DirectionalLight { ambientIntensity 0.6 color 1 1 1 direction 0.3 0.3 -1 intensity 1.4 castShadows FALSE }
+DEF FIRE Solid {
+  translation 0 0 0
+  children [ CadShape { url [ "../assets/firemodel/fire.obj" ] } ]
+  name "fire"
+}
+DEF SHOT Robot {
+  translation 0 -14 4
+  rotation 0 0 1 1.5708
+  children [ Camera { name "camera" width 600 height 600 fieldOfView 1.0 near 0.1 } ]
+  name "shot"
+  controller "preview_cap"
+  supervisor TRUE
+}

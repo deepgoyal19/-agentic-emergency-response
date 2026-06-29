@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<title>Rescue City — Gemma 4 on Cerebras</title>
+<style>
+  :root{
+    --bg:#070b12; --panel:#0e1622; --panel2:#131e2e; --line:#1f2d40;
+    --txt:#e6edf6; --dim:#8aa0b8; --cere:#ff5a1f; --gemma:#5b9bff;
+    --ok:#33d17a; --warn:#ffb020; --bad:#ff4d4d;
+  }
+  *{box-sizing:border-box} html,body{margin:0;height:100%}
+  body{background:var(--bg);color:var(--txt);font:13px/1.4 "Segoe UI",system-ui,sans-serif;
+       height:100vh;overflow:hidden;padding:12px;display:flex;flex-direction:column;gap:10px}
+  .top{display:flex;align-items:center;gap:14px;flex:none}
+  .brand{font-size:18px;font-weight:800}
+  .brand b{color:var(--cere)} .brand i{color:var(--gemma);font-style:normal}
+  .pill{padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid var(--line)}
+  .pill.mock{background:rgba(255,176,32,.12);color:var(--warn);border-color:#7a5a14}
+  .pill.cere{background:rgba(255,90,31,.14);color:var(--cere);border-color:#7a3214}
+  .incident{margin-left:auto;color:var(--dim);font-size:13px}
+
+  .grid{display:grid;grid-template-columns:1.05fr 1.05fr 0.95fr;gap:10px;flex:1;min-height:0}
+  .mapcard{flex:1;min-height:0;display:flex;flex-direction:column}
+  .mapcard canvas{flex:1;min-height:0;width:100%;background:#0a0f17;border:1px solid var(--line);border-radius:9px}
+  .legend{display:flex;gap:12px;margin-top:6px;font-size:10px;color:var(--dim)}
+  .legend i{font-style:normal} .legend b{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:middle}
+  .col{display:flex;flex-direction:column;gap:10px;min-height:0}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:11px;min-height:0}
+  h3{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--dim)}
+  .muted{color:var(--dim)}
+
+  .hero{flex:none;display:flex;align-items:baseline;gap:12px}
+  .hero .num{font-size:40px;font-weight:800;color:var(--cere);line-height:1}
+  .hero .unit{font-size:16px;color:var(--dim)}
+  .hero .sub{margin-left:auto;text-align:right;color:var(--dim);font-size:11px}
+  .hero .sub b{display:block;font-size:20px;color:var(--txt)}
+  #wall{font-size:10px}
+
+  .agents{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:7px}
+  .agent{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;flex:none;
+         background:var(--panel2);border:1px solid var(--line);opacity:.5;transition:.2s}
+  .agent.done{opacity:1;border-color:#2b4a6e;box-shadow:0 0 0 1px rgba(91,155,255,.15)}
+  .agent .idx{width:24px;height:24px;border-radius:50%;background:#0a1320;border:1px solid var(--line);
+              display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--dim);font-size:11px}
+  .agent.done .idx{background:var(--gemma);color:#04101f;border-color:var(--gemma)}
+  .agent .nm{font-weight:700} .agent .ro{color:var(--dim);font-size:11px}
+  .agent .out{color:var(--gemma);font-size:11px;margin-top:1px;font-family:ui-monospace,Consolas,monospace}
+  .agent .ms{margin-left:auto;text-align:right}
+  .agent .ms b{font-size:15px} .agent .ms span{display:block;font-size:9px;color:var(--dim)}
+
+  .logcard{flex:none;height:200px;display:flex;flex-direction:column}
+  .log{flex:1;overflow:auto;font-family:ui-monospace,Consolas,monospace;font-size:12px;
+       background:#0a0f17;border:1px solid var(--line);border-radius:9px;padding:8px}
+  .log div{padding:2px 0;border-bottom:1px solid #0f1928;color:var(--dim)}
+  .log div b{color:var(--txt);font-weight:600} .log div.k{color:var(--cere)}
+
+  .dronelist{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px}
+  .drone{display:flex;align-items:center;gap:7px;padding:6px 10px;border-radius:8px;cursor:pointer;
+         background:var(--panel2);border:1px solid var(--line)}
+  .drone.active{border-color:var(--cere);box-shadow:0 0 0 1px var(--cere)}
+  .drone .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+  .drone .dnm{font-weight:700;font-size:12px} .drone .dp{color:var(--dim);font-size:10px}
+
+  .povcard{flex:1;min-height:0;display:flex;flex-direction:column}
+  .frame{position:relative;flex:1;min-height:150px}
+  .frame img{width:100%;height:100%;min-height:150px;object-fit:contain;border-radius:9px;display:block;background:#0a0f17}
+  .dronelist{max-height:74px;overflow:auto}
+  .frame .tag{position:absolute;top:7px;left:7px;background:rgba(0,0,0,.6);padding:2px 8px;border-radius:6px;
+              font-size:10px;color:var(--gemma);font-weight:700}
+  .batt{display:flex;align-items:center;gap:10px}
+  .batt .bar{flex:1;height:16px;background:#0a1320;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .batt .fill{height:100%;background:var(--ok);width:100%;transition:width .4s,background .4s}
+  .batt .pct{font-weight:800;font-size:16px;min-width:48px;text-align:right}
+  .anaframe{flex:1;min-height:0;display:flex;flex-direction:column}
+</style>
+</head>
+<body>
+  <div class="top">
+    <div class="brand"><b>◉ RESCUE CITY</b> &nbsp;·&nbsp; <i>Gemma 4</i> on <b>Cerebras</b></div>
+    <span class="pill" style="background:#13351f;color:#33d17a;border-color:#1f6e3f">build v3</span>
+    <span id="provider" class="pill mock">MOCK</span>
+    <span class="incident" id="incident">waiting for mission…</span>
+  </div>
+
+  <div class="grid">
+    <!-- LEFT column: speed, agents, and the mission log at the bottom-left -->
+    <div class="col">
+      <div class="card hero">
+        <div><span class="num" id="total">0</span> <span class="unit">ms</span></div>
+        <div class="muted">Gemma&nbsp;4 <b>compute</b> on Cerebras<br><span id="wall"></span></div>
+        <div class="sub">agents fired <b id="count">0 / 6</b></div>
+      </div>
+      <div class="card" style="flex:1;min-height:0;display:flex;flex-direction:column">
+        <h3>Agent pipeline</h3>
+        <div class="agents" id="agents"></div>
+      </div>
+      <div class="card logcard">
+        <h3>Mission log</h3>
+        <div class="log" id="log"></div>
+      </div>
+    </div>
+
+    <!-- MIDDLE column: live 2D city map + battery -->
+    <div class="col">
+      <div class="card mapcard">
+        <h3>City map — towers · incidents · fleet (live)</h3>
+        <canvas id="map"></canvas>
+        <div class="legend">
+          <i><b style="background:#5b9bff"></b>tower</i>
+          <i><b style="background:#ff4d4d"></b>incident</i>
+          <i><b style="background:#33d17a"></b>responder</i>
+          <i><b style="background:#5b9bff"></b>patrol</i>
+          <i><b style="background:#ff5a1f"></b>fire brigade</i>
+          <i><b style="background:#ffd23f"></b>armed suspect</i>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Drone battery</h3>
+        <div class="batt"><div class="bar"><div class="fill" id="battFill"></div></div>
+          <div class="pct" id="battPct">—</div></div>
+      </div>
+    </div>
+
+    <!-- RIGHT column: live drone POV + analysis frame -->
+    <div class="col">
+      <div class="card povcard">
+        <h3>Drone fleet — click a drone for its onboard view</h3>
+        <div class="dronelist" id="dronelist"></div>
+        <div class="frame"><span class="tag" id="povtag">DRONE 1 · LIVE POV</span>
+          <img id="pov" alt="onboard camera — start a mission with live_view on" /></div>
+      </div>
+      <div class="card anaframe">
+        <h3>Aerial frame analyzed by Gemma&nbsp;4 vision</h3>
+        <div class="frame"><span class="tag">DRONE CAM</span><img id="frame" alt="awaiting capture" /></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ---------- fleet (mirrors MULTI in the controller) ----------
+const FLEET=[
+  {id:1,role:'responder',  label:'Responder',  payload:'first aid kit'},
+  {id:2,role:'responder',  label:'Responder',  payload:'camera + siren'},
+  {id:3,role:'responder',  label:'Responder',  payload:'extinguisher'},
+  {id:4,role:'patrol',     label:'Patrol',     payload:'surveillance'},
+  {id:5,role:'firebrigade',label:'Fire brigade',payload:'water cannon'},
+  {id:6,role:'firebrigade',label:'Fire brigade',payload:'foam jet'},
+  {id:7,role:'firebrigade',label:'Fire brigade',payload:'extinguisher'},
+];
+const ROLE_COLOR={responder:'#33d17a',patrol:'#5b9bff',firebrigade:'#ff5a1f'};
+function roleOf(id){const f=FLEET.find(x=>x.id===id);return f?f.role:'responder';}
+
+const PIPE_RESCUE=[
+  ["Dispatcher","classify & assign nearest tower/drone"],
+  ["PathPlanner","route from drone's live GPS"],
+  ["Perception","camera framing check"],
+  ["Analyst","multimodal scene analysis"],
+  ["Executor","drone commands + command-center report"],
+  ["FleetManager","battery: continue or return"],
+];
+const PIPE_PATROL=[
+  ["Surveillance","aerial armed-suspect scan (Gemma 4 vision)"],
+];
+function pipelineFor(role){return role==='patrol'?PIPE_PATROL:PIPE_RESCUE;}
+
+const TITLES={accident:"🚗 Highway collision — casualties, EMS not on scene",
+  fire:"🔥 Vehicle fire — suppression before crews arrive",
+  stalker:"🚶 Person being followed — safety escort",
+  highrise_fire:"🏢🔥 High-rise rooftop fire — aerial fire brigade",
+  patrol:"🛰 City patrol — scanning for armed suspects"};
+
+// static world layout (matches the .wbt / mesh_xy)
+const TOWERS=[[38,55],[78,-80],[-120,-80]];
+// incidents are NOT hardcoded — they pop onto the map as each drone reports in
+const INC_META={accident:{c:'#ff4d4d',t:'accident'},stalker:{c:'#ff4d4d',t:'stalker'},
+  fire:{c:'#ff4d4d',t:'vehicle fire'},highrise_fire:{c:'#ff8a1f',t:'high-rise fire'}};
+let liveIncidents={};          // incident_id -> {xy} discovered live
+const seenIds=new Set();       // drones that have ever gone active (sticky tabs)
+
+let activeDrone=null;          // chosen once a drone is actually live
+let activeIds=[];              // drones currently streaming (have data)
+const elAgents=document.getElementById('agents');
+function renderAgents(role){
+  elAgents.innerHTML='';
+  pipelineFor(role).forEach((a,i)=>{
+    const d=document.createElement('div'); d.className='agent'; d.id='ag-'+a[0];
+    d.innerHTML=`<div class="idx">${i+1}</div><div style="flex:1"><div class="nm">${a[0]}</div>
+      <div class="ro">${a[1]}</div><div class="out" id="out-${a[0]}"></div></div>
+      <div class="ms"><b id="ms-${a[0]}">—</b><span id="pv-${a[0]}"></span></div>`;
+    elAgents.appendChild(d);
+  });
+}
+function summarize(name,o){
+  if(o==null) return ""; if(typeof o==="string") return o.slice(0,60);
+  const pick=(...k)=>k.map(x=>o[x]!==undefined?`${x}=${o[x]}`:null).filter(Boolean).join("  ");
+  switch(name){
+    case"Dispatcher": return pick("incident_type","severity","required_payload");
+    case"PathPlanner": return pick("cruise_altitude","eta_seconds");
+    case"Perception": return pick("framed","suggest_move");
+    case"Analyst": return pick("people_detected","fire_present","recommended_action");
+    case"Executor": return pick("status")+"  "+(o.drone_commands?("cmds="+o.drone_commands.join(",")):"");
+    case"FleetManager": return pick("decision","return_target");
+    case"Surveillance": return pick("armed_person","threat_level","people_count");
+    default: return JSON.stringify(o).slice(0,60);
+  }
+}
+
+const elDrones=document.getElementById('dronelist');
+function renderDrones(){
+  // only drones that are actually live (streaming) get a clickable tab
+  elDrones.innerHTML='';
+  if(!activeIds.length){ elDrones.innerHTML='<span class="muted" style="font-size:11px">waiting for fleet to launch…</span>'; return; }
+  FLEET.filter(d=>activeIds.includes(d.id)).forEach(d=>{
+    const el=document.createElement('div');
+    el.className='drone'+(d.id===activeDrone?' active':'');
+    el.innerHTML=`<span class="dot" style="background:${ROLE_COLOR[d.role]}"></span>`+
+      `<span class="dnm">Drone ${d.id}</span><span class="dp">${d.label}</span>`;
+    el.onclick=()=>selectDrone(d.id);
+    elDrones.appendChild(el);
+  });
+}
+function selectDrone(id){
+  activeDrone=id; trail=[];
+  document.getElementById('povtag').textContent=`DRONE ${id} · LIVE POV`;
+  renderAgents(roleOf(id)); renderDrones(); poll(); pollPOV();
+}
+renderDrones();
+
+// POV: assign the live frame directly to the visible <img>. The tag self-reports the
+// load result so we can see (without a console) whether the image actually arrives.
+function pollPOV(){
+  const img=document.getElementById('pov'), tag=document.getElementById('povtag');
+  if(!img||!activeDrone) return;
+  img.onload=()=>{ tag.textContent='DRONE '+activeDrone+' · LIVE ('+img.naturalWidth+'×'+img.naturalHeight+')'; };
+  img.onerror=()=>{ tag.textContent='DRONE '+activeDrone+' · NO FEED (load failed)'; };
+  img.src='../frames/live_'+activeDrone+'.png?t='+Date.now();
+}
+setInterval(pollPOV,300);
+
+// ---- live 2D city map (dark): whole fleet + incidents + threat ----
+const cvs=document.getElementById('map'), mctx=cvs.getContext('2d');
+let trail=[], fleetPos=[], threatGps=null;
+const cityImg=new Image(); let cityOk=false;
+cityImg.onload=()=>cityOk=true; cityImg.src='citymap.png';
+const MAP_EXT=350;
+function drawMap(){
+  const W=cvs.clientWidth, H=cvs.clientHeight;
+  if(cvs.width!==W) cvs.width=W;
+  if(cvs.height!==H) cvs.height=H;
+  mctx.fillStyle='#0a0f17'; mctx.fillRect(0,0,W,H);
+  const side=Math.min(W,H), ox=(W-side)/2, oy=(H-side)/2;
+  if(cityOk) mctx.drawImage(cityImg, ox, oy, side, side);
+  else { mctx.fillStyle='#33415a'; mctx.font='12px sans-serif'; mctx.fillText('loading map…',12,22); }
+  const P=(wx,wy)=>[ox+((wx+MAP_EXT)/(2*MAP_EXT))*side, oy+((MAP_EXT-wy)/(2*MAP_EXT))*side];
+  mctx.font='bold 10px sans-serif';
+  // towers
+  TOWERS.forEach((t,i)=>{const[a,c]=P(t[0],t[1]);
+    mctx.fillStyle='#5b9bff'; mctx.fillRect(a-5,c-5,10,10);
+    mctx.fillStyle='#cfe0ff'; mctx.fillText('T'+(i+1),a+7,c+4);});
+  // incidents — only those reported so far (appear as drones launch)
+  Object.values(liveIncidents).forEach(it=>{const m=INC_META[it.id]||{c:'#ff4d4d',t:it.id};
+    if(!it.xy) return; const[a,c]=P(it.xy[0],it.xy[1]);
+    mctx.fillStyle=m.c; mctx.beginPath(); mctx.arc(a,c,7,0,7); mctx.fill();
+    mctx.strokeStyle='#000'; mctx.lineWidth=1; mctx.stroke();
+    mctx.fillStyle='#ffd0d0'; mctx.fillText(m.t,a+10,c+4);});
+  // armed-suspect threat (once the patrol locks it)
+  if(threatGps){const[a,c]=P(threatGps[0],threatGps[1]);
+    mctx.strokeStyle='#ffd23f'; mctx.lineWidth=2; mctx.beginPath(); mctx.arc(a,c,11,0,7); mctx.stroke();
+    mctx.fillStyle='#ffd23f'; mctx.fillText('⚠ armed suspect',a+13,c+4);}
+  // active-drone trail
+  if(trail.length>1){ mctx.strokeStyle='rgba(255,90,31,.85)'; mctx.lineWidth=2.5; mctx.beginPath();
+    trail.forEach((p,i)=>{const[a,c]=P(p[0],p[1]); i?mctx.lineTo(a,c):mctx.moveTo(a,c);}); mctx.stroke(); }
+  // every live drone
+  fleetPos.forEach(d=>{const[a,c]=P(d.x,d.y); const col=ROLE_COLOR[d.role]||'#33d17a';
+    if(d.id===activeDrone){ mctx.strokeStyle=col; mctx.lineWidth=2; mctx.beginPath(); mctx.arc(a,c,12,0,7); mctx.stroke(); }
+    mctx.fillStyle=col; mctx.beginPath(); mctx.arc(a,c,d.id===activeDrone?6:5,0,7); mctx.fill();
+    mctx.fillStyle='#dfe8f5'; mctx.fillText('D'+d.id,a+8,c+4);});
+}
+async function pollPos(){
+  const out=[];
+  await Promise.all(FLEET.map(async f=>{
+    try{ const r=await fetch('../live_pos_'+f.id+'.json?t='+Date.now(),{cache:'no-store'});
+      if(r.ok){ const p=await r.json();
+        const act=!!p.active;
+        out.push({id:f.id,x:p.x,y:p.y,role:p.role||f.role,active:act});
+        if(act) seenIds.add(f.id);                                   // sticky once launched
+        if(p.threat) threatGps=p.threat;
+        if(act && p.incident && p.incident_id) liveIncidents[p.incident_id]={id:p.incident_id,xy:p.incident};
+        if(f.id===activeDrone){ trail.push([p.x,p.y]); if(trail.length>600) trail.shift(); }
+      }
+    }catch(e){}
+  }));
+  fleetPos=out.filter(d=>d.active);                                  // only launched drones on the map
+  // tabs = drones that have gone active (stay after landing)
+  const ids=[...seenIds].sort((a,b)=>a-b);
+  const changed=ids.join(',')!==activeIds.join(',');
+  activeIds=ids;
+  if(activeDrone===null && ids.length){ selectDrone(ids[0]); }       // auto-pick first launched drone
+  else if(changed){ renderDrones(); }
+  drawMap();
+}
+setInterval(pollPos,150); pollPos();
+
+async function poll(){
+  if(activeDrone===null){ document.getElementById('incident').textContent='waiting for fleet to launch…'; return; }
+  try{
+    const role=roleOf(activeDrone);
+    const r=await fetch('../mission_log_'+activeDrone+'.json?t='+Date.now(),{cache:'no-store'});
+    const pipe=pipelineFor(role);
+    if(!r.ok){
+      document.getElementById('incident').textContent='Drone '+activeDrone+' — standing by…';
+      return;
+    }
+    const d=await r.json();
+    if(d.map&&d.map.threat) threatGps=d.map.threat;
+    document.getElementById('total').textContent=d.total_cerebras_ms||d.total_ms||0;
+    document.getElementById('wall').textContent='wall-clock '+(d.total_ms||0)+' ms (incl. network + image upload)';
+    const ev=d.events||[];
+    const denom=role==='patrol'?(ev.length||1):pipe.length;
+    document.getElementById('count').textContent=role==='patrol'?`${ev.length} scans`:`${Math.min(ev.length,denom)} / ${denom}`;
+    document.getElementById('incident').textContent=
+      `Drone ${activeDrone} · `+(TITLES[d.incident]||d.incident||role);
+    const prov=(ev.length&&ev[ev.length-1].provider)||"";
+    const pe=document.getElementById('provider');
+    if(prov==="cerebras"){pe.className="pill cere";pe.textContent="CEREBRAS · LIVE";}
+    else if(prov==="mock"){pe.className="pill mock";pe.textContent="MOCK";}
+    pipe.forEach(a=>{const c=document.getElementById('ag-'+a[0]); if(c) c.classList.remove('done');});
+    ev.forEach(e=>{
+      const card=document.getElementById('ag-'+e.agent); if(!card) return;
+      card.classList.add('done');
+      document.getElementById('ms-'+e.agent).textContent=(e.cerebras_ms||e.latency_ms)+' ms';
+      document.getElementById('pv-'+e.agent).textContent=(e.cerebras_ms?'CEREBRAS':'MOCK');
+      document.getElementById('out-'+e.agent).textContent=summarize(e.agent,e.output);
+    });
+    if(d.battery!=null){
+      const b=d.battery,f=document.getElementById('battFill');
+      f.style.width=Math.max(0,Math.min(100,b))+'%';
+      f.style.background=b>50?'var(--ok)':b>20?'var(--warn)':'var(--bad)';
+      document.getElementById('battPct').textContent=b.toFixed(0)+'%';
+    }
+    const log=document.getElementById('log');
+    log.innerHTML=(d.phases||[]).map(p=>{
+      const k=/COMPLETE|Low battery|Returning|DOCKED|dispatching|Analyzing|Reached|ARMED|SUSPECT|overwatch/.test(p.msg)?' class="k"':'';
+      return `<div${k}><b>t=${p.sim_time}</b> &nbsp;${p.msg}</div>`;
+    }).join('');
+    log.scrollTop=log.scrollHeight;
+    // analysis frame: the still Gemma actually scanned for THIS drone (direct assign)
+    const fimg=document.getElementById('frame');
+    const hasVision=ev.some(e=>e.agent==='Analyst'||e.agent==='Surveillance');
+    if(hasVision){
+      fimg.src='../frames/analysis_'+activeDrone+'.png?t='+Math.floor(Date.now()/2000);
+    } else if(fimg.getAttribute('src')){ fimg.removeAttribute('src'); }
+  }catch(e){}
+}
+setInterval(poll,400); poll();
+</script>
+</body>
+</html>

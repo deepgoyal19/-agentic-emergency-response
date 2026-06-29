@@ -1,0 +1,63 @@
+DASHBOARD RECORDING GUIDE — synced to the narration
+====================================================
+Dashboard layout reminder:
+  LEFT   = compute timer (ms) · Agent pipeline · 911 feed · Mission log
+  MIDDLE = 2D city map (towers, incidents, drones, threat)
+  RIGHT  = Drone fleet tabs (click one) · Live POV · 4 Gemma views
+
+BEFORE YOU START
+  1. Hard-refresh the dashboard (Ctrl+Shift+R) — loads the clean-reset code.
+  2. Click  ↻ Reset  — wipes old logs, launches a fresh sim.
+  3. Wait ~15-20 s for the drones to launch (tabs appear as drones go active).
+  4. Start screen recording + start the narration audio.
+
+--------------------------------------------------------------------
+[OPENING — "Seven autonomous drones... eight agents..."]
+  • Show the MIDDLE 2D map full — towers (Tower 1/2/3) + drones on them.
+  • Slowly mouse over the LEFT "Agent pipeline" and the compute-timer number.
+  • Hover the 911 feed so all incoming calls are visible.
+
+[ACCIDENT — "A nine-one-one call reports a traffic accident..."]
+  • Click the DRONE 1 tab (top-right fleet list).
+  • Show its Live POV (chase cam) flying over the city to the crash.
+  • As narration says "how low to go" — point to the 4 Gemma VIEWS filling in
+    (the down-cam descent shots) and the mission log lines:
+    "Gemma wants ~3.5 m ... descend to inspect closely".
+  • End on the Gemma quote in the log: "a blue vehicle ... overturned".
+
+[STALKER — "A woman reports a man following her..."]
+  • Click the DRONE 2 tab.
+  • On the MAP: point to the incident dot (the woman) + the moving threat dot.
+  • Show the log line: "broadcasting warning: Step away from her..."
+  • Then: "stalker leaving... Scene assessed SAFE."
+
+[HIGH-RISE FIRE — "a high-rise tower is burning..."]
+  • Click the DRONE 5 tab (fire-brigade lead).
+  • Show the front-cam facade VIEWS + the Gemma quote "active flames engulfing...".
+  • KEY: point to the log line "Gemma Coordinator -> blaze needs backup,
+    dispatching 2 more fire unit(s)".
+  • Then click DRONE 6 and DRONE 7 tabs — show "answering Gemma's
+    reinforcement call -> deploying to the fire" and them approaching the tower.
+
+[ARMED SUSPECT — "a patrol drone flies a surveillance route..."]
+  • Click the DRONE 4 tab (patrol).
+  • On the MAP: show it flying the route; then the yellow "armed suspect" marker
+    appears when it locks on.
+  • Log highlights, in order:
+      "ARMED SUSPECT detected..."
+      "Gemma Coordinator -> dispatch 2x police car"
+      "tracking moving suspect -> relaying last-known GPS..."
+      "police car en route — N m from suspect"  (watch the number drop)
+      "POLICE CAR ON SCENE" / "handoff complete, patrol cleared to RETURN"
+  • Note: the armed-suspect marker disappears from the map once police arrive.
+
+[CLOSE — "Everything you just saw was decided live..."]
+  • Zoom back to the FULL view: map + agent pipeline + the compute timer.
+  • Let the final compute number and "agents fired" counter sit on screen.
+
+TIPS
+  • If a tab's POV/views still say "awaiting feed", give that drone a few seconds —
+    its cameras only stream once it is active and on-scene.
+  • Record the whole run once end-to-end, then cut to match the narration in editing —
+    easier than clicking perfectly in real time.
+  • The 4 emergencies run in parallel, so you can revisit any drone tab at any time.

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>img test</title>
+<style>body{background:#111;color:#eee;font:14px sans-serif;padding:16px}
+img{border:3px solid lime;max-width:480px;display:block;margin:8px 0;background:#333}
+.r{padding:6px;margin:4px 0;border-radius:5px} .ok{background:#143} .bad{background:#411}</style>
+</head><body>
+<h2>Dashboard image diagnostic</h2>
+<div id="out"></div>
+<h3>1) relative path (what the dashboard uses): ../frames/live_1.png</h3>
+<img id="rel" src="../frames/live_1.png?t=1">
+<h3>2) absolute path: /frames/live_1.png</h3>
+<img id="abs" src="/frames/live_1.png?t=2">
+<h3>3) analysis frame: ../frames/analysis_1.png</h3>
+<img id="ana" src="../frames/analysis_1.png?t=3">
+<script>
+const out=document.getElementById('out');
+function log(msg,ok){const d=document.createElement('div');d.className='r '+(ok?'ok':'bad');d.textContent=msg;out.appendChild(d);}
+log('page URL: '+location.href, true);
+['rel','abs','ana'].forEach(id=>{
+  const im=document.getElementById(id);
+  im.onload=()=>log('IMG '+id+' LOADED  ('+im.naturalWidth+'x'+im.naturalHeight+')  '+im.currentSrc, true);
+  im.onerror=()=>log('IMG '+id+' FAILED to load: '+im.src, false);
+});
+// also test fetch of the image bytes
+fetch('../frames/live_1.png?t=9').then(r=>log('fetch image status '+r.status+' type '+r.headers.get('content-type'), r.ok))
+  .catch(e=>log('fetch image ERROR '+e, false));
+fetch('../live_pos_1.json?t=9').then(r=>r.json()).then(j=>log('fetch live_pos OK active='+j.active, true))
+  .catch(e=>log('fetch live_pos ERROR '+e, false));
+</script>
+</body></html>

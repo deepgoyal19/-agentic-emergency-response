@@ -1,0 +1,14 @@
+# Core: Gemma 4 on Cerebras (OpenAI-compatible). cerebras SDK is primary.
+cerebras-cloud-sdk>=1.0.0
+# OpenAI SDK as a fallback path (Cerebras is OpenAI-compatible) and for the
+# Gemini side-by-side latency comparison in the demo.
+openai>=1.40.0
+# Image handling for the drone camera frames -> base64 data URIs for Gemma vision.
+Pillow>=10.0.0
+python-dotenv>=1.0.0
+# Lightweight local dashboard (agent log + Cerebras timers overlay).
+fastapi>=0.110.0
+uvicorn>=0.29.0
+websockets>=12.0
+# Optional: Google Gemini client for the baseline latency comparison.
+google-genai>=0.3.0
