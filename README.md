@@ -1,6 +1,6 @@
 # Agentic Emergency Response System
 
-> A smart-city emergency response simulation where **7 autonomous drones** are driven by **8 specialized Gemma 4 agents running on Cerebras** — reasoning, in real time, over live camera feeds to resolve four emergencies at once. Nothing is hard-coded.
+> A smart-city emergency response simulation where **7 autonomous drones** are driven by **8 specialized Gemma 4 agents running on Cerebras** reasoning, in real time, over live camera feeds to resolve four emergencies at once. Nothing is hard-coded.
 
 ![Gemma 4](https://img.shields.io/badge/Gemma_4-gemma--4--31b-orange)
 ![Cerebras](https://img.shields.io/badge/Inference-Cerebras-red)
@@ -13,7 +13,7 @@
 
 ## What it is
 
-Emergency dispatch today runs on rigid, pre-written playbooks. We asked: **what if a city's first responders could *reason* about each situation as it unfolds** — like a human commander, but in seconds?
+Emergency dispatch today runs on rigid, pre-written playbooks. We asked: **what if a city's first responders could *reason* about each situation as it unfolds** just like a human commander, but in seconds?
 
 So we built a 3D smart-city in [Webots](https://cyberbotics.com/) where 7 drones rest on charging towers across the skyline. When emergencies are reported, a team of **8 Gemma 4 agents** reasons over the drones' real camera images to decide *who to send, how low to fly, when to escalate, and which responder fits the threat* — all live, all from what the drones actually see.
 
@@ -86,7 +86,7 @@ cd webots
 python serve.py             # or double-click webots/run_dashboard.bat
 ```
 
-Then open **http://localhost:{Port Number}/dashboard/** and click **Run**. Webots launches headless, the drones execute the four emergencies, and the dashboard streams everything live. Use **Reset** to start a clean run, **Stop** to halt.
+Then open **http://121.0.0.1:{Port Number}/dashboard/** and click **Run**. Webots launches headless, the drones execute the four emergencies, and the dashboard streams everything live. Use **Reset** to start a clean run, **Stop** to halt.
 
 > Tip: use `127.0.0.1`, not `localhost` — some browsers resolve `localhost` to IPv6 first and show a blank page. (The server is dual-stack, so both *should* work.)
 
