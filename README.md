@@ -86,7 +86,7 @@ cd webots
 python serve.py             # or double-click webots/run_dashboard.bat
 ```
 
-Then open **http://127.0.0.1:8000/dashboard/** and click **Run**. Webots launches headless, the drones execute the four emergencies, and the dashboard streams everything live. Use **Reset** to start a clean run, **Stop** to halt.
+Then open **http://localhost:{Port Number}/dashboard/** and click **Run**. Webots launches headless, the drones execute the four emergencies, and the dashboard streams everything live. Use **Reset** to start a clean run, **Stop** to halt.
 
 > Tip: use `127.0.0.1`, not `localhost` — some browsers resolve `localhost` to IPv6 first and show a blank page. (The server is dual-stack, so both *should* work.)
 
@@ -112,7 +112,7 @@ requirements.txt
 
 ## Credits & attributions
 
-- **3D City** — *"City pack 2"* by **[Pasha](https://sketchfab.com/Pasha.)** on Sketchfab ([model](https://skfb.ly/pzVr9)), licensed under **[CC Attribution 4.0](http://creativecommons.org/licenses/by/4.0/)**. The city skyline our entire simulation is built on comes from this pack — thank you!
+- **3D City** — *"City pack 2"* by **[Pasha](https://sketchfab.com/Pasha.)** on Sketchfab ([model](https://skfb.ly/pzVr9)), licensed under **[CC Attribution 4.0](http://creativecommons.org/licenses/by/4.0/)**. The city skyline our entire simulation is built on comes from this pack.
 - **Drone & pedestrians** — Mavic 2 Pro and Pedestrian PROTOs from **Webots** (Cyberbotics).
 - **Inference** — **Gemma 4** by Google DeepMind, served on **Cerebras**.
 
